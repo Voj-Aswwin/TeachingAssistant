@@ -19,7 +19,7 @@ user_query = input("What do you want to know about Indian Economy?\n\n")
 
 results = collection.query(
     query_texts=[user_query],
-    n_results=1
+    n_results=10
 )
 
 print(results['documents'])
