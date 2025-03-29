@@ -1,2 +1,2 @@
 # TeachingAssistant
-A RAG tool
+A RAG tool built with Gemini, Langchain, ChromaDB and Streamlit.

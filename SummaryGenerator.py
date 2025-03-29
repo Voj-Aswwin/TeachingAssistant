@@ -4,6 +4,8 @@ import google.generativeai as genai
 import os
 import json
 from youtube_transcript_api import YouTubeTranscriptApi
+from fpdf import FPDF
+import subprocess
 
 # Page Layout Configuration
 st.set_page_config(layout="wide", page_title="YouTube Video Analysis")
@@ -34,6 +36,48 @@ def get_gemini_response(prompt):
         return response.text.strip()
     except Exception as e:
         return f"Error generating content: {str(e)}"
+
+def generate_pdf():
+
+    # ✅ Ensure 'data' folder exists
+    data_folder = "data"
+    os.makedirs(data_folder, exist_ok=True)
+
+    # ✅ Set PDF file path
+    pdf_path = os.path.join(data_folder, "summary.pdf")
+
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+
+    # ✅ Use a Unicode-compatible font (built-in)
+    pdf.set_font("Helvetica", size=12)
+    pdf.set_left_margin(10)
+    pdf.set_right_margin(10)
+
+    # Add Summary
+    pdf.cell(200, 10, "Summary", ln=True, align='C')
+    pdf.ln(10)
+    summary = st.session_state.get('gemini_summary', "No summary generated yet.")
+    pdf.multi_cell(190, 10, summary.encode("latin-1", "replace").decode("latin-1"))  # ✅ Handle encoding
+    pdf.ln(10)
+
+    # Add Questions and Answers
+    pdf.cell(200, 10, "Questions & Answers", ln=True, align='C')
+    pdf.ln(10)
+    for i, (q, a) in enumerate(st.session_state.get('conversation_history', [])):
+        # ✅ Reset indentation before each question
+        pdf.set_x(10)
+        pdf.multi_cell(0, 10, f"Q{i+1}: {q}".encode("latin-1", "replace").decode("latin-1"))
+        
+        # ✅ Reset indentation before each answer
+        pdf.set_x(10)
+        pdf.multi_cell(0, 10, f"A{i+1}: {a}".encode("latin-1", "replace").decode("latin-1"))
+        
+        pdf.ln(5)  # ✅ Add spacing for readability
+
+    pdf.output(pdf_path)
+    return pdf_path
 
 # Initialize session state variables
 if 'youtube_urls' not in st.session_state:
@@ -136,6 +180,17 @@ if st.session_state.get('selected_function') == "main":
             st.write(f"**Q{i+1}:** {q}")
             st.write(f"**A{i+1}:** {a}")
 
+    # generate pdf 
+    if st.button("Generate PDF"):
+        pdf_file = generate_pdf()
+
+        # ✅ Run filldb.py to process the PDF into ChromaDB
+        try:
+            subprocess.run(["python", "filldb.py", pdf_file], check=True)
+            st.success("PDF generated and database updated successfully!")
+        except subprocess.CalledProcessError as e:
+            st.error(f"Error running filldb.py: {e}")
+        
 elif st.session_state.get('selected_function') == "quiz":
     st.subheader("Quiz Section")
     st.subheader("Take the Quiz")

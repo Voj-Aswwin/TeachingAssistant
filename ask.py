@@ -8,14 +8,13 @@ load_dotenv()
 
 # setting the environment
 
-DATA_PATH = r"data"
 CHROMA_PATH = r"chroma_db"
 
 chroma_client = chromadb.PersistentClient(path=CHROMA_PATH)
 
-collection = chroma_client.get_or_create_collection(name="econ_survey")
+collection = chroma_client.get_or_create_collection(name="youtube_summaries")
 
-user_query = input("What do you want to know about Indian Economy?\n\n")
+user_query = input("What do you want to learn today?\n\n")
 
 results = collection.query(
     query_texts=[user_query],
@@ -34,14 +33,18 @@ def get_gemini_response(prompt):
     except Exception as e:
         return f"Error generating content: {str(e)}"
 
-system_prompt = """
-You are a helpful assistant. And a economic expert. You answer questions about Indian economy based on the economic survey report published recently. 
-But you only answer based on knowledge I'm providing you. You don't use your internal 
-knowledge and you don't make things up.
+system_prompt = f"""
+You are my second brain. You have summaries about different YouTube videos I watched. 
+Answer my questions based on the data given here. If there is no information that directly answers the question I asked, tell that.  
+Don't make things up on your own and don't give irrelevant information. 
 --------------------
+My Question:
+{user_query}
+
 The data:
-"""+str(results['documents'])+"""
+{results['documents']}
 """
+
 
 #print(system_prompt)
 
