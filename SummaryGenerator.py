@@ -105,14 +105,16 @@ if 'selected_function' not in st.session_state:
 
 # Sidebar Navigation
 st.sidebar.title("Navigation")
-if st.session_state['selected_function'] == "main":
-    if st.sidebar.button("Go to Quiz", key="go_to_quiz_button"):
-        st.session_state['selected_function'] = "quiz"
-        st.rerun()
-elif st.session_state['selected_function'] == "quiz":
-    if st.sidebar.button("Back to Main Page", key="back_to_main_button"):
-        st.session_state['selected_function'] = "main"
-        st.rerun()
+
+if "page" not in st.session_state:
+    st.session_state.page = "Main"  # Default page
+
+if st.sidebar.button("Main Page"):
+    st.session_state.page = "Main"
+if st.sidebar.button("Quiz Page"):
+    st.session_state.page = "Quiz"
+if st.sidebar.button("Talk to DB"):
+    st.session_state.page = "Talk to DB"
         
 
 # Main Content
@@ -128,7 +130,7 @@ if st.button("Add URL", key="add_url_button"):
         st.session_state['youtube_urls'].append(youtube_url)
         st.success("URL added successfully.")
 
-if st.session_state.get('selected_function') == "main":
+if st.session_state.page == "Main":
     st.subheader("Fetch Transcripts and Generate Summary")
     if st.button("Fetch Summary", key="fetch_summary_button"):
         if not st.session_state['youtube_urls']:
@@ -198,43 +200,7 @@ if st.session_state.get('selected_function') == "main":
         except subprocess.CalledProcessError as e:
             st.error(f"Error running filldb.py: {e}")
 
-    st.subheader("Talk to Your Database 🧠")
-    user_query = st.text_input("Ask something from the DB...", placeholder="E.g., What is quantum mechanics?")
-    if st.button("Get Answer"):
-        if user_query.strip():
-            with st.spinner("Searching the database..."):
-                # Query ChromaDB
-                results = collection.query(query_texts=[user_query], n_results=10)
-    
-                # Format AI system prompt
-                system_prompt = f"""
-                You are my second brain. You have summaries about different YouTube videos I watched. 
-                Answer my questions based on the data given here. If there is no information that directly answers the question I asked, 
-                tell that there is no information on the topic in "the second brain" yet. Use the phrase "second brain"
-                Don't make things up on your own and don't give irrelevant information. 
-                --------------------
-                My Question:
-                {user_query}
-    
-                The data:
-                {results['documents']}
-                """
-    
-                # Get AI-generated response
-                try:
-                    model = genai.GenerativeModel("gemini-1.5-flash")
-                    response = model.generate_content(system_prompt)
-                    response_text = response.text.strip()
-                except Exception as e:
-                    response_text = f"Error: {str(e)}"
-    
-                # Display result
-                st.subheader("AI Response")
-                st.write(response_text)
-        else:
-            st.warning("Please enter a question.")
-
-elif st.session_state.get('selected_function') == "quiz":
+elif st.session_state.page == "Quiz":
     st.subheader("Quiz Section")
     st.subheader("Take the Quiz")
     if st.button("Generate Quiz", key="generate_quiz_button"):
@@ -274,3 +240,40 @@ elif st.session_state.get('selected_function') == "quiz":
             with st.expander("View Answers"):
                 for result in results:
                     st.markdown(result)
+
+elif st.session_state.page == "Talk to DB":
+    st.subheader("Talk to Your Database 🧠")
+    user_query = st.text_input("Ask something from the DB...", placeholder="E.g., What is quantum mechanics?")
+    if st.button("Get Answer"):
+        if user_query.strip():
+            with st.spinner("Searching the database..."):
+                # Query ChromaDB
+                results = collection.query(query_texts=[user_query], n_results=10)
+    
+                # Format AI system prompt
+                system_prompt = f"""
+                You are my second brain. You have summaries about different YouTube videos I watched. 
+                Answer my questions based on the data given here. If there is no information that directly answers the question I asked, 
+                tell that there is no information on the topic in "the second brain" yet. Use the phrase "second brain"
+                Don't make things up on your own and don't give irrelevant information. 
+                --------------------
+                My Question:
+                {user_query}
+    
+                The data:
+                {results['documents']}
+                """
+    
+                # Get AI-generated response
+                try:
+                    model = genai.GenerativeModel("gemini-1.5-flash")
+                    response = model.generate_content(system_prompt)
+                    response_text = response.text.strip()
+                except Exception as e:
+                    response_text = f"Error: {str(e)}"
+    
+                # Display result
+                st.subheader("AI Response")
+                st.write(response_text)
+        else:
+            st.warning("Please enter a question.")
