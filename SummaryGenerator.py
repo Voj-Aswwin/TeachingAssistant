@@ -6,6 +6,7 @@ import json
 from youtube_transcript_api import YouTubeTranscriptApi
 from fpdf import FPDF
 import subprocess
+import chromadb
 
 # Page Layout Configuration
 st.set_page_config(layout="wide", page_title="YouTube Video Analysis")
@@ -14,6 +15,11 @@ st.set_page_config(layout="wide", page_title="YouTube Video Analysis")
 def get_video_id(url):
     video_id = re.search(r'v=([a-zA-Z0-9_-]{11})', url)
     return video_id.group(1) if video_id else None
+
+# 🔹 Connect to ChromaDB
+CHROMA_PATH = r"chroma_db"
+chroma_client = chromadb.PersistentClient(path=CHROMA_PATH)
+collection = chroma_client.get_or_create_collection(name="youtube_summaries")
 
 # Function to fetch YouTube transcript
 def fetch_transcript(url):
@@ -107,6 +113,7 @@ elif st.session_state['selected_function'] == "quiz":
     if st.sidebar.button("Back to Main Page", key="back_to_main_button"):
         st.session_state['selected_function'] = "main"
         st.rerun()
+        
 
 # Main Content
 st.title("YouTube Video Analysis & Quiz Generator")
@@ -181,7 +188,7 @@ if st.session_state.get('selected_function') == "main":
             st.write(f"**A{i+1}:** {a}")
 
     # generate pdf 
-    if st.button("Generate PDF"):
+    if st.button("Add Data to DB"):
         pdf_file = generate_pdf()
 
         # ✅ Run filldb.py to process the PDF into ChromaDB
@@ -190,7 +197,43 @@ if st.session_state.get('selected_function') == "main":
             st.success("PDF generated and database updated successfully!")
         except subprocess.CalledProcessError as e:
             st.error(f"Error running filldb.py: {e}")
-        
+
+    st.subheader("Talk to Your Database 🧠")
+    user_query = st.text_input("Ask something from the DB...", placeholder="E.g., What is quantum mechanics?")
+    if st.button("Get Answer"):
+        if user_query.strip():
+            with st.spinner("Searching the database..."):
+                # Query ChromaDB
+                results = collection.query(query_texts=[user_query], n_results=10)
+    
+                # Format AI system prompt
+                system_prompt = f"""
+                You are my second brain. You have summaries about different YouTube videos I watched. 
+                Answer my questions based on the data given here. If there is no information that directly answers the question I asked, 
+                tell that there is no information on the topic in "the second brain" yet. Use the phrase "second brain"
+                Don't make things up on your own and don't give irrelevant information. 
+                --------------------
+                My Question:
+                {user_query}
+    
+                The data:
+                {results['documents']}
+                """
+    
+                # Get AI-generated response
+                try:
+                    model = genai.GenerativeModel("gemini-1.5-flash")
+                    response = model.generate_content(system_prompt)
+                    response_text = response.text.strip()
+                except Exception as e:
+                    response_text = f"Error: {str(e)}"
+    
+                # Display result
+                st.subheader("AI Response")
+                st.write(response_text)
+        else:
+            st.warning("Please enter a question.")
+
 elif st.session_state.get('selected_function') == "quiz":
     st.subheader("Quiz Section")
     st.subheader("Take the Quiz")
