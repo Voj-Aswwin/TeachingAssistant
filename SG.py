@@ -220,7 +220,7 @@ elif st.session_state.page == "Quiz":
             st.session_state['mcq_questions'] = questions
         except json.JSONDecodeError:
             st.error("Failed to parse quiz questions.")
-
+    
     if st.session_state.get('mcq_questions'):
         user_answers = {}
         for idx, q in enumerate(st.session_state['mcq_questions']):
