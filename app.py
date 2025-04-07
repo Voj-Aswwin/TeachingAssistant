@@ -3,6 +3,7 @@ from modules.ui_components import setup_sidebar
 from pages.Main import MainPage
 from pages.QuizPage import QuizPage
 from pages.TalkToDBPage import TalkToDBPage
+from pages.RoughBookPage import RoughBookPage
 
 
 st.set_page_config(layout="wide", page_title="YouTube Video Analysis")
@@ -25,6 +26,8 @@ if 'conversation_history' not in st.session_state:
     st.session_state['conversation_history'] = []        
 if 'db_conversation' not in st.session_state:
     st.session_state['db_conversation'] = []
+if 'rough_notes' not in st.session_state:
+    st.session_state['rough_notes'] = None   
 
 setup_sidebar()
 
@@ -39,4 +42,7 @@ elif st.session_state.page == "Quiz":
 elif st.session_state.page == "Talk to DB":
 
     TalkToDBPage()
-        
+
+elif st.session_state.page == "Rough Book":
+
+    RoughBookPage()        

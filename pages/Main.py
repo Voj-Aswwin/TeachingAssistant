@@ -1,6 +1,6 @@
 import streamlit as st
 from modules.summarization import get_gemini_response
-from modules.pdf_generator import generate_pdf
+from modules.pdf_generator import generate_pdf_of_youtube_summaries
 from modules.db_utils import add_to_db
 from modules.youtube_utils import fetch_transcript
 from modules.data_extraction import extract_numerical_data
@@ -72,7 +72,7 @@ def MainPage():
 
     if st.button("Save Summary to DB"):
         
-        pdf_file = generate_pdf()
+        pdf_file = generate_pdf_of_youtube_summaries()
 
         # ✅ Run filldb.py to process the PDF into ChromaDB
         add_to_db(pdf_file)

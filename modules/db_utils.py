@@ -21,7 +21,7 @@ def add_to_db(pdf_file_path):
 def talk_to_db(query):
     # Submits query to DB and retrieves response
     if query.strip():
-            with st.spinner("Searching the database..."):
+            with st.spinner(" 🧠 Thinking..."):
                 
                 collection = connect_db()
                 
