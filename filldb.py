@@ -57,4 +57,5 @@ collection.upsert(
     ids=ids
 )
 
+print(collection)
 print(f"Added {len(documents)} new documents to ChromaDB.")
