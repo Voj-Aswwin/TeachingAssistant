@@ -30,9 +30,7 @@ if 'db_conversation' not in st.session_state:
 if 'rough_notes' not in st.session_state:
     st.session_state['rough_notes'] = None   
 if "fp_chat_history" not in st.session_state:
-        st.session_state['fp_chat_history'] = [
-            ("You", "Hey there! Ready to teach!"),
-            ("CuriousBot", "Hello Professor! I'm excited to learn! 😊")]
+        st.session_state['fp_chat_history'] = []
 
 setup_sidebar()
 
