@@ -4,6 +4,7 @@ from pages.Main import MainPage
 from pages.QuizPage import QuizPage
 from pages.TalkToDBPage import TalkToDBPage
 from pages.RoughBookPage import RoughBookPage
+from pages.TeachAndLearnPage import TeachAndLearnPage
 
 
 st.set_page_config(layout="wide", page_title="YouTube Video Analysis")
@@ -28,6 +29,10 @@ if 'db_conversation' not in st.session_state:
     st.session_state['db_conversation'] = []
 if 'rough_notes' not in st.session_state:
     st.session_state['rough_notes'] = None   
+if "fp_chat_history" not in st.session_state:
+        st.session_state['fp_chat_history'] = [
+            ("You", "Hey there! Ready to teach!"),
+            ("CuriousBot", "Hello Professor! I'm excited to learn! 😊")]
 
 setup_sidebar()
 
@@ -45,4 +50,8 @@ elif st.session_state.page == "Talk to DB":
 
 elif st.session_state.page == "Rough Book":
 
-    RoughBookPage()        
+    RoughBookPage()
+
+elif st.session_state.page == "Teach And Learn":
+
+    TeachAndLearnPage()     
