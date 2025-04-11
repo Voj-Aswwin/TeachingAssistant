@@ -57,7 +57,7 @@ def MainPage():
     if st.button("Generate Timeline", key="generate_timeline_button"):
         with st.spinner("Generating timeline..."):
             st.session_state['extracted_timeline'] = extract_timeline(st.session_state["summary"])
-    if st.session_state: st.markdown(st.session_state['extracted_timeline'])
+    if st.session_state['extracted_timeline']: st.markdown(st.session_state['extracted_timeline'])
     
     # Ask Questions about Summary
     

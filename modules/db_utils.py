@@ -58,8 +58,6 @@ def add_pdf_documents_to_db(pdf_file_path):
          metadata.append(chunk.metadata)
      
          i += 1
-     
-     print(documents,metadata,ids)
 
      # adding to chromadb
      collection.upsert(
