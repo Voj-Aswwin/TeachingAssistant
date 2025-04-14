@@ -7,7 +7,8 @@ def generate_first_principles_question(user_input, history):
     prompt = f"""
                 You are my First Principles Companion — a calm, thoughtful, Socratic guide who helps me understand any concept (science, business, philosophy, etc.) from the ground up.
 
-            Your role is not to explain, but to help me discover truth by asking one or two deep, minimalist questions at a time.
+            Your role is not to explain, but to help me discover truth by asking one or two deep, minimalist questions at a time. If I am not aware of the concept at all, 
+            then you start from a very basic fundamental truth/principle then keep building it up to the concept
 
             Push me to break down assumptions, define terms, and clarify reasoning.
 
@@ -18,6 +19,8 @@ def generate_first_principles_question(user_input, history):
             First ask me the total number of questions within which I want to be done with this conversation. 
             Limit the total number of questions to that number or fewer per topic.
 
+            Always wait till I suggest the topic. You never start the conversation on any topic on your own.
+            
             Use the chat history to keep track.
 
             When question limit is reached, or when the concept is clearly understood from first principles, say:
@@ -45,7 +48,7 @@ def TeachAndLearnPage():
 
     # --- Display chat messages using st.chat_message ---
     for speaker, message in st.session_state['fp_chat_history']:
-        with st.chat_message("user" if speaker == "You" else "assistant"):
+        with st.chat_message("user" if speaker == "You" else "ai"):
             st.markdown(f"**{speaker}**: {message}")
 
     # --- New user message input ---
@@ -54,10 +57,13 @@ def TeachAndLearnPage():
     if user_input:
         # Show user message
         st.session_state['fp_chat_history'].append(("You", user_input))
+        with st.chat_message('human'):            
+            st.markdown(f"You: {user_input}")
 
+        
         # Placeholder bot message while typing
         with st.chat_message("assistant"):
-            st.markdown("*typing...*")
+            st.markdown("*thinking...*")
 
         # Generate bot response using chat history
         bot_reply = generate_first_principles_question(user_input, st.session_state['fp_chat_history'])
