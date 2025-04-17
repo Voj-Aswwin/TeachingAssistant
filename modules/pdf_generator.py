@@ -41,7 +41,8 @@ def generate_pdf_of_rough_notes(notes):
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
-    pdf.set_font("Helvetica", size=12)
+    pdf.add_font('Noto', '', 'fonts/NotoSans-Regular.ttf', uni=True)
+    pdf.set_font('Noto', '', 5)
 
     pdf.cell(200, 10, "Summary", ln=True, align='C')
     pdf.ln(10)

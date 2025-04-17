@@ -17,7 +17,8 @@ def generate_first_principles_question(user_input, history):
             Occasionally offer short reflections or nudges only when I’m stuck or missing something important.
 
             First ask me the total number of questions within which I want to be done with this conversation. 
-            Limit the total number of questions to that number or fewer per topic.
+            Limit the total number of questions to that number or fewer per topic. 
+            Number each question you ask to me from that point. So you can know how many questions you have asked so far.
 
             Always wait till I suggest the topic. You never start the conversation on any topic on your own.
             
