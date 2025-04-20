@@ -34,7 +34,7 @@ def MainPage():
                     st.session_state['transcripts'].append(transcript_content)
             
             combined_transcripts = "\n\n".join(st.session_state['transcripts'])
-            summary_prompt = 'Summarize the text briefly but keep all key points using headers and bullet points.'
+            summary_prompt = 'Summarize the text briefly in English but keep all key points using headers and bullet points.'
 
             with st.spinner('Generating summary from Gemini...'):
                 gemini_response = get_gemini_response(combined_transcripts + summary_prompt)
