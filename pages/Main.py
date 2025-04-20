@@ -6,18 +6,24 @@ from modules.youtube_utils import fetch_transcript
 from modules.data_extraction import extract_numerical_data
 from modules.ask_questions import ask_question, write_conversation_history
 from modules.timeline_generator import extract_timeline
+import requests
+from bs4 import BeautifulSoup
+
+def is_youtube_url(url):
+    return "youtube.com/watch" in url or "youtu.be" in url
+
 
 def MainPage():
     st.title("YouTube Video Analysis & Quiz Generator")
 
-    youtube_url = st.text_input("Add a YouTube URL", placeholder="Enter the URL here...")
+    input_url = st.text_input("Add a website or youtube video URL", placeholder="Enter the URL here...")
     if st.button("Add URL", key="add_url_button"):
-        if youtube_url.strip() == "":
+        if input_url.strip() == "":
             st.error("Please enter a valid YouTube URL.")
-        elif youtube_url in st.session_state['youtube_urls']:
+        elif input_url in st.session_state['youtube_urls']:
             st.warning("This URL is already added.")
         else:
-            st.session_state['youtube_urls'].append(youtube_url)
+            st.session_state['youtube_urls'].append(input_url)
             st.success("URL added successfully.")
 
     st.subheader("Fetch Transcripts and Generate Summary")
@@ -27,12 +33,26 @@ def MainPage():
         else:
             st.session_state['transcripts'] = []
             for url in st.session_state['youtube_urls']:
-                transcript_content, error = fetch_transcript(url)
-                if error:
-                    st.error(f"Error fetching transcript for {url}: {error}")
+                if is_youtube_url(url):
+                    transcript_content, error = fetch_transcript(url)
+                    if error:
+                        st.error(f"Error fetching transcript for {url}: {error}")
+                    else:
+                        st.session_state['transcripts'].append(transcript_content)
                 else:
-                    st.session_state['transcripts'].append(transcript_content)
-            
+                    try:
+                        response = requests.get(url, timeout=10)
+                        response.raise_for_status()
+                        soup = BeautifulSoup(response.text, "html.parser")
+                        for tag in soup(["script", "style", "nav", "footer", "header", "aside"]):
+                            tag.decompose()
+                        text = soup.get_text(separator="\n")
+                        clean_lines = [line.strip() for line in text.splitlines() if line.strip()]
+                        page_content = "\n".join(clean_lines)
+                        st.session_state['transcripts'].append(page_content[:10000])
+                    except Exception as e:
+                        st.error(f"Failed to fetch website content from {url}: {e}")
+
             combined_transcripts = "\n\n".join(st.session_state['transcripts'])
             summary_prompt = 'Summarize the text briefly in English but keep all key points using headers and bullet points.'
 
