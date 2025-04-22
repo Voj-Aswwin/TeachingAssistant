@@ -16,15 +16,30 @@ def is_youtube_url(url):
 def MainPage():
     st.title("YouTube Video Analysis & Quiz Generator")
 
-    input_url = st.text_input("Add a website or youtube video URL", placeholder="Enter the URL here...")
-    if st.button("Add URL", key="add_url_button"):
-        if input_url.strip() == "":
-            st.error("Please enter a valid YouTube URL.")
-        elif input_url in st.session_state['youtube_urls']:
-            st.warning("This URL is already added.")
-        else:
-            st.session_state['youtube_urls'].append(input_url)
-            st.success("URL added successfully.")
+    col1, col2 = st.columns([4, 1])
+    with col1:
+        input_url = st.text_input("Enter a URL (YouTube or Website)", placeholder="Enter the URL here...")
+    with col2:
+        st.markdown("<div style='height: 1.7em;'></div>", unsafe_allow_html=True)
+        if st.button("Add", key="add_url_button"):
+            if input_url.strip() == "":
+                st.error("Please enter a valid URL.")
+            elif input_url in st.session_state['youtube_urls']:
+                st.warning("This URL is already added.")
+            else:
+                st.session_state['youtube_urls'].append(input_url)
+
+    # Display list of added URLs with remove buttons
+    if st.session_state['youtube_urls']:
+        st.subheader("📚 Added URLs")
+        for idx, url in enumerate(st.session_state['youtube_urls']):
+            col1, col2 = st.columns([8, 1])
+            with col1:
+                st.markdown(f"- {url}")
+            with col2:
+                if st.button("❌", key=f"remove_{idx}"):
+                    st.session_state['youtube_urls'].pop(idx)
+                    st.rerun()
 
     st.subheader("Fetch Transcripts and Generate Summary")
     if st.button("Fetch Summary", key="fetch_summary_button"):
@@ -52,15 +67,14 @@ def MainPage():
                         st.session_state['transcripts'].append(page_content[:10000])
                     except Exception as e:
                         st.error(f"Failed to fetch website content from {url}: {e}")
+                combined_transcripts = "\n\n".join(st.session_state['transcripts'])
 
-            combined_transcripts = "\n\n".join(st.session_state['transcripts'])
-            summary_prompt = 'Summarize the text briefly in English but keep all key points using headers and bullet points.'
-
-            with st.spinner('Generating summary from Gemini...'):
-                gemini_response = get_gemini_response(combined_transcripts + summary_prompt)
-            
-            st.session_state['summary'] = gemini_response
-            st.session_state['combined_transcripts'] = combined_transcripts
+        with st.spinner('Generating summary from Gemini...'):
+            summary_prompt = 'Summarize the text briefly but keep all key points using headers and bullet points.'
+            gemini_response = get_gemini_response(combined_transcripts + summary_prompt)
+        
+        st.session_state['summary'] = gemini_response
+        st.session_state['combined_transcripts'] = combined_transcripts
     
     if st.session_state['summary']:
         st.write(st.session_state['summary'])
