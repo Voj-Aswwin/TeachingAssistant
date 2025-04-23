@@ -96,11 +96,13 @@ def MainPage():
     # Ask Questions about Summary
     
     st.subheader("Ask Questions")
+    if st.session_state['conversation_history']:
+            write_conversation_history()
     question = st.text_input("Your Question", placeholder="Ask something about the transcript...")
     if st.button("Get Answer"):
-        answer = ask_question(question, st.session_state['combined_transcripts'])   
-    if st.session_state['conversation_history']:
-        write_conversation_history()
+        answer = ask_question(question, st.session_state['combined_transcripts']) 
+        
+        
 
     # Add Summary to DB
 
