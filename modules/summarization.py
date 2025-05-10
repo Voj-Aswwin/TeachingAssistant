@@ -5,7 +5,7 @@ def get_gemini_response(prompt):
     """Generates a response using Google's Gemini AI."""
     try:
         genai.configure(api_key=os.environ["API_KEY"])
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-2.5-pro-exp-03-25")
         response = model.generate_content(prompt+" Generate responses only in English")
         return response.text.strip()
     except Exception as e:
