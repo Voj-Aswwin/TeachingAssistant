@@ -5,6 +5,7 @@ from pages.QuizPage import QuizPage
 from pages.TalkToDBPage import TalkToDBPage
 from pages.RoughBookPage import RoughBookPage
 from pages.TeachAndLearnPage import TeachAndLearnPage
+from pages.DailyNewsPage import DailyNewsPage
 
 
 st.set_page_config(layout="wide", page_title="YouTube Video Analysis")
@@ -53,3 +54,7 @@ elif st.session_state.page == "Rough Book":
 elif st.session_state.page == "Teach And Learn":
 
     TeachAndLearnPage()     
+
+elif st.session_state.page == "Daily News":
+
+    DailyNewsPage()        
