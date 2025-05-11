@@ -40,7 +40,7 @@ def get_news_urls():
         "https://www.aljazeera.com/news",
         "https://www.nytimes.com",
         "https://www.firstpost.com/",
-        "https://inc42.com/",
+        "https://entrackr.com/",
         "https://www.livemint.com/",
         "https://www.thehindu.com/",
         "https://www.thehindu.com/news/national/",
