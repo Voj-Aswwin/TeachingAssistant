@@ -44,7 +44,9 @@ def get_news_urls():
         "https://www.livemint.com/",
         "https://www.thehindu.com/",
         "https://www.thehindu.com/news/national/",
-        "https://www.thehindu.com/news/international/"
+        "https://www.thehindu.com/news/international/",
+        "https://techcrunch.com/",
+        "https://www.techcrunch.com/"
     ]
 
 def fetch_all_news():
@@ -76,15 +78,33 @@ def generate_news_summary(news_content, model_name="gemini-2.0-flash"):
     Returns:
         str: The generated summary
     """
-    summary_prompt = """Analyze these news articles and provide:
-    1. A comprehensive summary of the 15 main stories
-    2. Key points and important details of each story in about 60 words
-    3. Any notable trends or patterns
-    4. Potential implications or future developments
+    summary_prompt = """
+    Given the news stories, help me identify the underlying mental models, economic 
+    and psychological incentives, power dynamics, technological trends, and long-term implications. 
+    Avoid summarising the headlines—focus instead on what’s truly driving these events.
+
+    - What forces (economic, societal, political, technological) are at play beneath the surface?
+    - Who benefits, who loses, and what trade-offs are being made?
+    - What mental models or cognitive biases explain this behaviour or decision?
+    - How might this evolve over 1, 3, and 10 years? What are the second- or third-order effects?
+    - Are there connections or patterns across multiple stories?
+
+    Apply the following modifiers depending on the type of story:
+
+    - Startup or Tech Business News:
+        “What’s the core moat or edge here—tech, distribution, or brand? Is this solving a vitamin problem or a painkiller-level problem? 
+        Who loses market share or leverage if this works?”
+    - Policy or Regulatory News:
+        “What behaviour is the policy attempting to shape or curb? Whose power is being protected or threatened? Are there unintended consequences waiting to happen?”
+    - Consumer Trends:
+        “What fear, desire, or aspiration is this trend tapping into? What does this say about shifting values or identity signals in the culture?”
+    - International/Geopolitical News:
+        “What are the hidden goals—economic access, soft power, resource control, strategic alliances? What game theory principles are at play?”
+      Finish by listing 1–3 mental models or frameworks that best explain the behaviours, systems, or decisions reflected in the news.
+      
+      """
     
-    Format the response with clear headers and bullet points."""
-    
-    return get_gemini_response(news_content + summary_prompt, model_name)
+    return get_gemini_response(news_content + summary_prompt)
 
 def generate_news_chat_response(user_input, history, news_content, model_name="gemini-2.0-flash"):
     """Generates a chat response about the news content.

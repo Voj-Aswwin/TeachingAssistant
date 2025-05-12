@@ -19,6 +19,8 @@ def setup_sidebar():
         st.session_state.page = "Teach And Learn" 
     if st.sidebar.button("Daily News"):
         st.session_state.page = "Daily News" 
+    if st.sidebar.button("Live Transcribe"):
+        st.session_state.page = "Live Transcribe"
 
 def show_summary(summary):
     """Displays summary in Streamlit."""
