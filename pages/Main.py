@@ -71,7 +71,7 @@ def MainPage():
 
         with st.spinner('Generating summary from Gemini...'):
             summary_prompt = 'Summarize the text briefly but keep all key points using headers and bullet points.'
-            gemini_response = get_gemini_response(combined_transcripts + summary_prompt)
+            gemini_response = get_gemini_response(combined_transcripts + summary_prompt, model_name="gemini-2.0-flash")
         
         st.session_state['summary'] = gemini_response
         st.session_state['combined_transcripts'] = combined_transcripts

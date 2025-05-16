@@ -6,7 +6,7 @@ def ask_question(query, transcript):
     if query.strip():
             with st.spinner("Generating response..."):
                 full_prompt = transcript + "\nQ: " + query
-                response = get_gemini_response(full_prompt)
+                response = get_gemini_response(full_prompt,model_name="gemini-2.0-flash")
                 st.session_state['conversation_history'].append((query, response))
                 st.rerun() 
     return response        

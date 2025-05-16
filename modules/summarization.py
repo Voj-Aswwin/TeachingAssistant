@@ -1,12 +1,12 @@
 import google.generativeai as genai
 import os
 
-def get_gemini_response(prompt, model_name="gemini-2.5-pro-exp-03-25"):
+def get_gemini_response(prompt, model_name="gemini-2.0-flash"):
     """Generates a response using Google's Gemini AI.
     
     Args:
         prompt (str): The prompt to generate a response for
-        model_name (str): The name of the Gemini model to use. Defaults to "gemini-2.5-pro-exp-03-25"
+        model_name (str): The name of the Gemini model to use. Defaults to "gemini-2.0-flash"
     
     Returns:
         str: The generated response text

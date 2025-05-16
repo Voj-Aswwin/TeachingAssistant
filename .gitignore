@@ -6,4 +6,5 @@
 Issues.txt
 ideas.txt
 VoicetoText.py
-secrets.toml
+*.toml
+*.mdc

@@ -7,6 +7,7 @@ from pages.RoughBookPage import RoughBookPage
 from pages.TeachAndLearnPage import TeachAndLearnPage
 from pages.DailyNewsPage import DailyNewsPage
 from pages.LiveTranscribePage import LiveTranscribePage
+from pages.ShortNewsPage import ShortNewsPage
 import queue
 
 
@@ -75,3 +76,5 @@ elif st.session_state.page == "Daily News":
     DailyNewsPage()
 elif st.session_state.page == "Live Transcribe":
     LiveTranscribePage()        
+elif st.session_state.page == "Short News":
+    ShortNewsPage()
