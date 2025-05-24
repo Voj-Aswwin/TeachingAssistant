@@ -5,10 +5,10 @@ def setup_sidebar():
     st.sidebar.title("Navigation")
 
     if "page" not in st.session_state:
-        st.session_state.page = "Main"  # Default page
+        st.session_state.page = "YoutubeSummarizer"  # Default page
 
-    if st.sidebar.button("Main Page"):
-        st.session_state.page = "Main"
+    if st.sidebar.button("Youtube Summarizer Page"):
+        st.session_state.page = "YoutubeSummarizer"
     if st.sidebar.button("Quiz Page"):
         st.session_state.page = "Quiz"
     if st.sidebar.button("Talk to DB"):
@@ -16,13 +16,9 @@ def setup_sidebar():
     if st.sidebar.button("Rough Book"):
         st.session_state.page = "Rough Book"    
     if st.sidebar.button("Teach And Learn"):
-        st.session_state.page = "Teach And Learn" 
-    if st.sidebar.button("Daily News"):
-        st.session_state.page = "Daily News" 
+        st.session_state.page = "Teach And Learn"
     if st.sidebar.button("Live Transcribe"):
         st.session_state.page = "Live Transcribe"
-    if st.sidebar.button("Short News"):
-        st.session_state.page = "Short News"
 
 def show_summary(summary):
     """Displays summary in Streamlit."""

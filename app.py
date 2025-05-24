@@ -1,13 +1,11 @@
 import streamlit as st
 from modules.ui_components import setup_sidebar
-from pages.Main import MainPage
+from pages.YoutubeSummarizerPage import MainPage
 from pages.QuizPage import QuizPage
 from pages.TalkToDBPage import TalkToDBPage
 from pages.RoughBookPage import RoughBookPage
 from pages.TeachAndLearnPage import TeachAndLearnPage
-from pages.DailyNewsPage import DailyNewsPage
 from pages.LiveTranscribePage import LiveTranscribePage
-from pages.ShortNewsPage import ShortNewsPage
 import queue
 
 
@@ -62,7 +60,7 @@ setup_sidebar()
 # st.write("Debug - Session State Keys:", list(st.session_state.keys()))
 
 # Route to appropriate page
-if st.session_state.page == "Main":
+if st.session_state.page == "YoutubeSummarizer":
     MainPage()
 elif st.session_state.page == "Quiz":
     QuizPage()
@@ -72,9 +70,5 @@ elif st.session_state.page == "Rough Book":
     RoughBookPage()
 elif st.session_state.page == "Teach And Learn":
     TeachAndLearnPage()     
-elif st.session_state.page == "Daily News":
-    DailyNewsPage()
 elif st.session_state.page == "Live Transcribe":
-    LiveTranscribePage()        
-elif st.session_state.page == "Short News":
-    ShortNewsPage()
+    LiveTranscribePage()

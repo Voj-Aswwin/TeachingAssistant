@@ -42,7 +42,13 @@ def MainPage():
                     st.rerun()
 
     st.subheader("Fetch Transcripts and Generate Summary")
-    if st.button("Fetch Summary", key="fetch_summary_button"):
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        fetch_summary_clicked = st.button("Fetch Summary", key="fetch_summary_button")
+    with col2:
+        collect_insights_clicked = st.button("Collect Insights", key="collect_insights_button")
+
+    if fetch_summary_clicked:
         if not st.session_state['youtube_urls']:
             st.error("Please add at least one YouTube URL.")
         else:
@@ -67,17 +73,69 @@ def MainPage():
                         st.session_state['transcripts'].append(page_content[:10000])
                     except Exception as e:
                         st.error(f"Failed to fetch website content from {url}: {e}")
-                combined_transcripts = "\n\n".join(st.session_state['transcripts'])
+            combined_transcripts = "\n\n".join(st.session_state['transcripts'])
+            with st.spinner('Generating summary from Gemini...'):
+                summary_prompt = '''Present the transcript as headers and paragraphs. Cover all the topics in the transcript in 5 lines each. Do not miss even a single topic. Dont overuse Bullet points. Use it only for important facts and numbers. '''
+                gemini_response = get_gemini_response(combined_transcripts + summary_prompt, model_name="gemini-2.0-flash")
+            st.session_state['summary'] = gemini_response
+            st.session_state['combined_transcripts'] = combined_transcripts
 
-        with st.spinner('Generating summary from Gemini...'):
-            summary_prompt = 'Summarize the text briefly but keep all key points using headers and bullet points.'
-            gemini_response = get_gemini_response(combined_transcripts + summary_prompt, model_name="gemini-2.0-flash")
-        
-        st.session_state['summary'] = gemini_response
-        st.session_state['combined_transcripts'] = combined_transcripts
-    
-    if st.session_state['summary']:
+    if collect_insights_clicked:
+        if not st.session_state['youtube_urls']:
+            st.error("Please add at least one YouTube URL.")
+        else:
+            st.session_state['transcripts'] = []
+            for url in st.session_state['youtube_urls']:
+                if is_youtube_url(url):
+                    transcript_content, error = fetch_transcript(url)
+                    if error:
+                        st.error(f"Error fetching transcript for {url}: {error}")
+                    else:
+                        st.session_state['transcripts'].append(transcript_content)
+                else:
+                    try:
+                        response = requests.get(url, timeout=10)
+                        response.raise_for_status()
+                        soup = BeautifulSoup(response.text, "html.parser")
+                        for tag in soup(["script", "style", "nav", "footer", "header", "aside"]):
+                            tag.decompose()
+                        text = soup.get_text(separator="\n")
+                        clean_lines = [line.strip() for line in text.splitlines() if line.strip()]
+                        page_content = "\n".join(clean_lines)
+                        st.session_state['transcripts'].append(page_content[:10000])
+                    except Exception as e:
+                        st.error(f"Failed to fetch website content from {url}: {e}")
+            combined_transcripts = "\n\n".join(st.session_state['transcripts'])
+            insights_prompt = '''I have some transcripts of news with me. Collect me some insights on them.
+I don't want plain summaries. I want you to go deep, find patterns across multiple newsletters, and give me key emerging trends you notice.
+
+✅ Avoid generic, overused statements like "AI is changing the world." Instead, explain specifically how such trends are unfolding—whether through new business models, shifts in user behavior, regulatory changes, or technological advancements.
+
+✅ Structure your output clearly:
+
+Start with a TL;DR section summarizing the key insights in 4–6 sentences.
+
+Then go into detailed analysis using headers and paragraphs.
+
+Use bullet points only when citing specific facts, numbers, or data points, not for general narration.
+
+End with a summary of the key trends for quick reference.
+
+Be analytical, connect the dots across sectors, and highlight what's genuinely new or noteworthy—not what's obvious or widely known.
+
+Transcript : ''' + combined_transcripts
+            with st.spinner('Collecting insights from Gemini...'):
+                insights_response = get_gemini_response(insights_prompt, model_name="gemini-2.0-flash")
+            st.session_state['insights'] = insights_response
+            st.session_state['combined_transcripts'] = combined_transcripts
+
+    if st.session_state.get('summary'):
         st.write(st.session_state['summary'])
+
+    if st.session_state.get('insights'):
+        st.markdown("---")
+        st.subheader(":bulb: Insights")
+        st.write(st.session_state['insights'])
 
     # Extract Numerical Data    
 

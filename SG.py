@@ -107,10 +107,10 @@ if 'selected_function' not in st.session_state:
 st.sidebar.title("Navigation")
 
 if "page" not in st.session_state:
-    st.session_state.page = "Main"  # Default page
+    st.session_state.page = "YoutubeSummarizer"  # Default page
 
-if st.sidebar.button("Main Page"):
-    st.session_state.page = "Main"
+if st.sidebar.button("Youtube Summarizer Page"):
+    st.session_state.page = "YoutubeSummarizer"
 if st.sidebar.button("Quiz Page"):
     st.session_state.page = "Quiz"
 if st.sidebar.button("Talk to DB"):
@@ -130,7 +130,7 @@ if st.button("Add URL", key="add_url_button"):
         st.session_state['youtube_urls'].append(youtube_url)
         st.success("URL added successfully.")
 
-if st.session_state.page == "Main":
+if st.session_state.page == "YoutubeSummarizer":
     st.subheader("Fetch Transcripts and Generate Summary")
     if st.button("Fetch Summary", key="fetch_summary_button"):
         if not st.session_state['youtube_urls']:
