@@ -8,6 +8,7 @@ from modules.ask_questions import ask_question, write_conversation_history
 from modules.timeline_generator import extract_timeline
 import requests
 from bs4 import BeautifulSoup
+import pyperclip
 
 def is_youtube_url(url):
     return "youtube.com/watch" in url or "youtu.be" in url
@@ -42,6 +43,12 @@ def MainPage():
                     st.rerun()
 
     st.subheader("Fetch Transcripts and Generate Summary")
+    
+    # Add secondary prompt text box
+    secondary_prompt = st.text_area("Additional Instructions (Optional)", 
+                                  placeholder="Add any specific instructions for the summary...",
+                                  height=70)
+    
     col1, col2 = st.columns([1, 1])
     with col1:
         fetch_summary_clicked = st.button("Fetch Summary", key="fetch_summary_button")
@@ -75,8 +82,11 @@ def MainPage():
                         st.error(f"Failed to fetch website content from {url}: {e}")
             combined_transcripts = "\n\n".join(st.session_state['transcripts'])
             with st.spinner('Generating summary from Gemini...'):
-                summary_prompt = '''Present the transcript as headers and paragraphs. Cover all the topics in the transcript in 5 lines each. Do not miss even a single topic. Dont overuse Bullet points. Use it only for important facts and numbers. '''
-                gemini_response = get_gemini_response(combined_transcripts + summary_prompt, model_name="gemini-2.0-flash")
+                base_prompt = '''Summarize the transcript as headers and paragraphs. Cover all the topics in the transcript in 5 lines each. Do not miss even a single topic. Dont overuse Bullet points. Use it only for important facts and numbers. '''
+                # Append secondary prompt if provided
+                if secondary_prompt and secondary_prompt.strip():
+                    base_prompt = f"{base_prompt} \n\nAdditional instructions: {secondary_prompt}"
+                gemini_response = get_gemini_response(combined_transcripts + base_prompt, model_name="gemini-2.0-flash")
             st.session_state['summary'] = gemini_response
             st.session_state['combined_transcripts'] = combined_transcripts
 
@@ -130,6 +140,15 @@ Transcript : ''' + combined_transcripts
             st.session_state['combined_transcripts'] = combined_transcripts
 
     if st.session_state.get('summary'):
+        # Add Copy Transcripts button
+        if st.button("📋 Copy Transcripts", key="copy_transcripts_button", 
+                    help="Copy all transcripts to clipboard"):
+            if 'combined_transcripts' in st.session_state and st.session_state['combined_transcripts']:
+                pyperclip.copy(st.session_state['combined_transcripts'])
+                st.success("Transcripts copied to clipboard!")
+            else:
+                st.warning("No transcripts available to copy.")
+        
         st.write(st.session_state['summary'])
 
     if st.session_state.get('insights'):
