@@ -15,3 +15,7 @@ langchain>=0.1.0
 langchain-community>=0.0.10
 streamlit-autorefresh>=0.3.1
 yt-dlp>=2024.04.17
+python-pptx>=0.6.21
+python-docx>=1.0.1
+PyPDF2>=3.0.0
+PyCryptodome>=3.19.0
