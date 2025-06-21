@@ -267,19 +267,89 @@ Transcript : ''' + combined_transcripts
         st.subheader(":bulb: Insights")
         st.write(st.session_state['insights'])
 
-    # Extract Numerical Data    
-
-    if st.button("Extract Numbers", key="extract_numericals"):
-        with st.spinner("Extracting Numerical Data"):
-            st.session_state['numerical_data'] = extract_numerical_data(st.session_state["summary"])
-    if st.session_state['numerical_data']: st.markdown(st.session_state['numerical_data'])
+    # Action Buttons Row
+    col1, col2 = st.columns(2)
     
-    # Generate Timeline
-
-    if st.button("Generate Timeline", key="generate_timeline_button"):
-        with st.spinner("Generating timeline..."):
-            st.session_state['extracted_timeline'] = extract_timeline(st.session_state["summary"])
-    if st.session_state['extracted_timeline']: st.markdown(st.session_state['extracted_timeline'])
+    with col1:
+        # Extract Numerical Data    
+        if st.button("🔢 Extract Numbers", key="extract_numerals", use_container_width=True):
+            with st.spinner("Extracting Numerical Data"):
+                st.session_state['numerical_data'] = extract_numerical_data(st.session_state["summary"])
+    
+    with col2:
+        # Generate Timeline
+        if st.button("⏱️ Generate Timeline", key="generate_timeline_button", use_container_width=True):
+            with st.spinner("Generating timeline..."):
+                st.session_state['extracted_timeline'] = extract_timeline(st.session_state["summary"])
+    
+    # Mind Map Section
+    st.markdown("---")
+    st.markdown("### 🧠 Generate Mind Map")
+    
+    # Add secondary prompt input
+    secondary_prompt = st.text_area(
+        "Customize your mind map (optional):",
+        placeholder="E.g., 'Focus on key concepts and their relationships', 'Highlight technical terms', etc.",
+        key="youtube_mindmap_secondary_prompt"
+    )
+    
+    if st.button("🗺️ Generate Mind Map", key="generate_mindmap_button", use_container_width=True):
+        with st.spinner("Generating mind map..."):
+            from modules.mindmap_utils import generate_flowchart_prompt, parse_llm_response
+            
+            # Get the summary text
+            summary_text = st.session_state.get('summary', '')
+            if not summary_text:
+                st.warning("No summary available to generate mind map")
+                st.stop()
+            
+            # Generate base prompt
+            base_flowchart_prompt = generate_flowchart_prompt(summary_text)
+            
+            # Add secondary prompt if provided
+            if secondary_prompt.strip():
+                flowchart_prompt = f"{base_flowchart_prompt}\n\nAdditional Instructions: {secondary_prompt}"
+            else:
+                flowchart_prompt = base_flowchart_prompt
+            
+            # Generate and display the flowchart
+            mermaid_code = get_gemini_response(flowchart_prompt, "gemini-2.0-flash")
+            mermaid_code, _ = parse_llm_response(mermaid_code)
+            
+            if mermaid_code:
+                st.markdown("### 🎨 Generated Mind Map")
+                with st.expander("View Flowchart Code"):
+                    st.code(mermaid_code, language="mermaid")
+                
+                # Add Mermaid.js library
+                st.markdown(
+                    """
+                    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+                    <script>
+                        mermaid.initialize({ startOnLoad: true });
+                    </script>
+                    """,
+                    unsafe_allow_html=True
+                )
+                
+                # Display the flowchart
+                st.markdown(
+                    f"""
+                    <div class="mermaid">
+                    {mermaid_code}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+    
+    # Display Numerical Data and Timeline if available
+    if st.session_state.get('numerical_data'):
+        st.markdown("### 🔢 Extracted Numerical Data")
+        st.markdown(st.session_state['numerical_data'])
+    
+    if st.session_state.get('extracted_timeline'):
+        st.markdown("### ⏱️ Generated Timeline")
+        st.markdown(st.session_state['extracted_timeline'])
     
     # Ask Questions about Summary
     
