@@ -46,7 +46,7 @@ Text to convert to mind map:
 
 def generate_flowchart_prompt(text: str) -> str:
     """
-    Generate a prompt for creating a Mermaid.js flowchart from text.
+    Generate a prompt for creating a Mermaid.js flowchart from text with inline styling.
     
     Args:
         text: The input text to convert to a flowchart
@@ -55,27 +55,55 @@ def generate_flowchart_prompt(text: str) -> str:
         str: Formatted prompt for the LLM
     """
     return f"""Convert the following text into a Mermaid.js flowchart that visually represents the main ideas and their relationships.
-The flowchart should be structured with clear nodes and logical connections.
+The flowchart should use INLINE STYLING for maximum compatibility. Follow these rules exactly:
 
-Follow these guidelines:
-1. Start with 'flowchart TD' (Top-Down direction)
-2. Use square brackets [] for regular nodes
-3. Use double curly brackets {{}} for decision points
-4. Use arrows (-->) to connect nodes
-5. Use text on arrows to describe relationships (e.g., A -->|leads to| B)
-6. Keep node labels concise but meaningful
-7. Group related concepts together
-8. Highlight key points or main ideas
-9. Quote node labels with spaces/special characters.
+1. Use this exact format for nodes:
+   - Main concepts: style NODE fill:#e6f3ff,stroke:#66b3ff,color:#0066cc,stroke-width:2px
+   - Details: style NODE fill:#fff9c4,stroke:#ffd54f,color:#5d4037,stroke-width:1.5px
+   - Actions: style NODE fill:#e8f5e9,stroke:#81c784,color:#2e7d32,stroke-width:1.5px
+   - Decisions: style NODE fill:#fce4ec,stroke:#f48fb1,color:#c2185b,stroke-width:1.5px,shape:rhombus
+   - Results: style NODE fill:#f3e5f5,stroke:#ba68c8,color:#6a1b9a,stroke-width:1.5px
 
-Example:
+2. Start with: flowchart TD
+3. Define all nodes first, then connections, then styles
+4. Use simple node names (A, B, C, etc.)
+5. Always enclose node text in double quotes
+6. Use these arrow styles:
+   - --> for main flows
+   - -.-> for secondary relationships
+   - ==> for important connections
+
+Example of required format:
 ```mermaid
 flowchart TD
-    A["Main Topic"] --> B["Subtopic 1"]
-    A --> C["Subtopic 2"]
-    B --> D["Point A"]
-    B --> E["Point B"]
-    C -->|leads to| F["Conclusion"]
+    %% Define nodes
+    A["Main Topic"]
+    B["Key Point 1"]
+    C["Key Point 2"]
+    D["Supporting Detail"]
+    E["Action Step"]
+    F{{"Decision"}}
+    G["Result A"]
+    H["Result B"]
+    
+    %% Define connections
+    A --> B
+    A --> C
+    B --> D
+    B -->|leads to| E
+    C --> F
+    F -->|Yes| G
+    F -->|No| H
+    
+    %% Apply styles
+    style A fill:#e6f3ff,stroke:#66b3ff,color:#0066cc,stroke-width:2px
+    style B fill:#e6f3ff,stroke:#66b3ff,color:#0066cc,stroke-width:2px
+    style C fill:#e6f3ff,stroke:#66b3ff,color:#0066cc,stroke-width:2px
+    style D fill:#fff9c4,stroke:#ffd54f,color:#5d4037,stroke-width:1.5px
+    style E fill:#e8f5e9,stroke:#81c784,color:#2e7d32,stroke-width:1.5px
+    style F fill:#fce4ec,stroke:#f48fb1,color:#c2185b,stroke-width:1.5px,shape:rhombus
+    style G fill:#f3e5f5,stroke:#ba68c8,color:#6a1b9a,stroke-width:1.5px
+    style H fill:#f3e5f5,stroke:#ba68c8,color:#6a1b9a,stroke-width:1.5px
 ```
 
 Text to convert to flowchart:

@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 from modules.summarization import get_gemini_response
 from modules.pdf_generator import generate_pdf_of_youtube_summaries
 from modules.db_utils import add_to_db
@@ -6,6 +7,7 @@ from modules.youtube_utils import fetch_transcript
 from modules.data_extraction import extract_numerical_data
 from modules.ask_questions import ask_question, write_conversation_history
 from modules.timeline_generator import extract_timeline
+from modules.mindmap_utils import generate_mindmap_prompt, parse_llm_response, generate_flowchart_prompt
 import requests
 from bs4 import BeautifulSoup
 import pyperclip
@@ -15,6 +17,8 @@ from docx import Document
 from pptx import Presentation
 import tempfile
 import os
+import json
+import graphviz
 
 def is_youtube_url(url):
     return url and ("youtube.com/watch" in url or "youtu.be" in url)
@@ -95,6 +99,8 @@ def MainPage():
         st.session_state['numerical_data'] = ""
     if 'extracted_timeline' not in st.session_state:
         st.session_state['extracted_timeline'] = ""
+    if 'mindmap_data' not in st.session_state:
+        st.session_state['mindmap_data'] = None
     if 'fetch_summary_clicked' not in st.session_state:
         st.session_state['fetch_summary_clicked'] = False
     if 'collect_insights_clicked' not in st.session_state:
@@ -282,28 +288,26 @@ Transcript : ''' + combined_transcripts
             with st.spinner("Generating timeline..."):
                 st.session_state['extracted_timeline'] = extract_timeline(st.session_state["summary"])
     
-    # Mind Map Section
+    # Mermaid Flowchart Section
     st.markdown("---")
-    st.markdown("### 🧠 Generate Mind Map")
+    st.markdown("### 🧠 Generate Mermaid Flowchart")
     
     # Add secondary prompt input
     secondary_prompt = st.text_area(
-        "Customize your mind map (optional):",
+        "Customize your flowchart (optional):",
         placeholder="E.g., 'Focus on key concepts and their relationships', 'Highlight technical terms', etc.",
         key="youtube_mindmap_secondary_prompt"
     )
     
-    if st.button("🗺️ Generate Mind Map", key="generate_mindmap_button", use_container_width=True):
-        with st.spinner("Generating mind map..."):
-            from modules.mindmap_utils import generate_flowchart_prompt, parse_llm_response
-            
+    if st.button("📊 Generate Flowchart", key="generate_mindmap_button", use_container_width=True):
+        with st.spinner("Generating Mermaid flowchart..."):
             # Get the summary text
             summary_text = st.session_state.get('summary', '')
             if not summary_text:
-                st.warning("No summary available to generate mind map")
+                st.warning("No summary available to generate flowchart")
                 st.stop()
             
-            # Generate base prompt
+            # Generate base prompts
             base_flowchart_prompt = generate_flowchart_prompt(summary_text)
             
             # Add secondary prompt if provided
@@ -312,35 +316,68 @@ Transcript : ''' + combined_transcripts
             else:
                 flowchart_prompt = base_flowchart_prompt
             
-            # Generate and display the flowchart
-            mermaid_code = get_gemini_response(flowchart_prompt, "gemini-2.0-flash")
-            mermaid_code, _ = parse_llm_response(mermaid_code)
-            
-            if mermaid_code:
-                st.markdown("### 🎨 Generated Mind Map")
-                with st.expander("View Flowchart Code"):
-                    st.code(mermaid_code, language="mermaid")
+            try:
+                # Generate and display the flowchart
+                mermaid_code = get_gemini_response(flowchart_prompt, "gemini-2.0-flash")
+                mermaid_code, _ = parse_llm_response(mermaid_code)
                 
-                # Add Mermaid.js library
-                st.markdown(
-                    """
-                    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
-                    <script>
-                        mermaid.initialize({ startOnLoad: true });
-                    </script>
-                    """,
-                    unsafe_allow_html=True
-                )
+                if mermaid_code:
+                    st.session_state['mermaid_code'] = mermaid_code
+                    st.success("Flowchart generated successfully!")
                 
-                # Display the flowchart
-                st.markdown(
-                    f"""
-                    <div class="mermaid">
-                    {mermaid_code}
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
+            except Exception as e:
+                st.error(f"Error generating flowchart: {str(e)}")
+                st.exception(e)
+    
+    # Display the Mermaid code if available
+    if 'mermaid_code' in st.session_state and st.session_state['mermaid_code']:
+        mermaid_code = st.session_state['mermaid_code']
+        
+        # Display the Mermaid.js flowchart
+        st.markdown("### 🎨 Mermaid Flowchart")
+        
+        # Display the code in a code block
+        st.code(mermaid_code, language="mermaid")
+        
+        # Add the Mermaid.js library with minimal configuration
+        st.markdown(
+            """
+            <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+            <script>
+                mermaid.initialize({ 
+                    startOnLoad: true,
+                    securityLevel: 'loose',
+                    theme: 'default',
+                    fontFamily: 'Arial, sans-serif'
+                });
+            </script>
+            """,
+            unsafe_allow_html=True
+        )
+        
+        # Display the flowchart with a container for better rendering
+        st.markdown(
+            f"""
+            <div style="background-color: white; padding: 20px; border-radius: 10px; margin: 10px 0;">
+                <div class="mermaid">
+                {mermaid_code}
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
+        # Add a small delay to ensure Mermaid renders properly
+        st.markdown(
+            """
+            <script>
+                setTimeout(function() {{
+                    mermaid.init(undefined, document.getElementsByClassName('mermaid'));
+                }}, 100);
+            </script>
+            """,
+            unsafe_allow_html=True
+        )
     
     # Display Numerical Data and Timeline if available
     if st.session_state.get('numerical_data'):
